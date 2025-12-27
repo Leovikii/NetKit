@@ -1,0 +1,14 @@
+bin/
+build/bin/
+frontend/dist/
+frontend/node_modules/
+node_modules/
+wailsjs/
+.idea/
+.vscode/
+*.exe
+*.dll
+*.log
+.DS_Store
+Thumbs.db
+.vite/
