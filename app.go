@@ -32,7 +32,6 @@ func (a *App) startup(ctx context.Context) {
 }
 
 func (a *App) GetAdapters() ([]NetAdapter, error) {
-
 	psScript := `
 	$ErrorActionPreference = 'SilentlyContinue'
 	[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
@@ -42,29 +41,21 @@ func (a *App) GetAdapters() ([]NetAdapter, error) {
 	$dnsList = Get-DnsClientServerAddress -AddressFamily IPv4
 	$routes = Get-NetRoute -DestinationPrefix '0.0.0.0/0' -AddressFamily IPv4
 
-	$result = @()
-
-	foreach ($a in $adapters) {
+	$result = foreach ($a in $adapters) {
 		$idx = $a.InterfaceIndex
 		
-		# 获取 IP
 		$v4 = @(($ips | Where-Object { $_.InterfaceIndex -eq $idx -and $_.AddressFamily -eq 'IPv4' }).IPAddress)
 		$v6 = @(($ips | Where-Object { $_.InterfaceIndex -eq $idx -and $_.AddressFamily -eq 'IPv6' }).IPAddress)
-		
-		# 获取 DNS
 		$dns = @(($dnsList | Where-Object { $_.InterfaceIndex -eq $idx }).ServerAddresses)
-		
-		# 获取网关 (NextHop)
 		$gw = @(($routes | Where-Object { $_.InterfaceIndex -eq $idx }).NextHop)
 
-		# 处理速度显示
 		$finalSpeed = $a.LinkSpeed
 		if ([string]::IsNullOrWhiteSpace($finalSpeed) -and $a.Speed -gt 0) {
 			$finalSpeed = "$([math]::Round($a.Speed / 1MB)) Mbps"
 		}
 		if ([string]::IsNullOrWhiteSpace($finalSpeed)) { $finalSpeed = "N/A" }
 
-		$result += [PSCustomObject]@{
+		[PSCustomObject]@{
 			name = $a.Name
 			interfaceDesc = $a.InterfaceDescription
 			status = $a.Status
@@ -77,7 +68,6 @@ func (a *App) GetAdapters() ([]NetAdapter, error) {
 		}
 	}
 	
-	# 强制转换为数组 JSON
 	@($result) | ConvertTo-Json -Depth 4 -Compress
 	`
 
@@ -86,19 +76,16 @@ func (a *App) GetAdapters() ([]NetAdapter, error) {
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-
 		return []NetAdapter{}, nil
 	}
-
-	var adapters []NetAdapter
 
 	if len(output) == 0 {
 		return []NetAdapter{}, nil
 	}
 
+	var adapters []NetAdapter
 	err = json.Unmarshal(output, &adapters)
 	if err != nil {
-
 		var single NetAdapter
 		if err2 := json.Unmarshal(output, &single); err2 == nil {
 			return []NetAdapter{single}, nil
