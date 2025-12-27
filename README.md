@@ -1,19 +1,28 @@
-# README
+# NetKit
 
-## About
+A lightweight and beautiful Network Interface Manager for Windows, built with **Go**, **Wails**, **React**, and **TailwindCSS v4**.
 
-This is the official Wails React-TS template.
+## Features
 
-You can configure the project by editing `wails.json`. More information about the project settings can be found
-here: https://wails.io/docs/reference/project-config
+- ⚡ **Zero-delay Startup**: Immediate skeletal loading screen.
+- 🎨 **Modern UI**: Vertical layout, frameless window, and glassmorphism effects.
+- 🔍 **Detailed Insights**: View IPv4/IPv6, Gateway, DNS, MAC address, and Link Speed.
+- 🛡️ **Admin Control**: Restart network adapters directly from the UI.
+- 🚀 **High Performance**: Optimized PowerShell queries for instant data retrieval.
 
-## Live Development
+## Tech Stack
 
-To run in live development mode, run `wails dev` in the project directory. This will run a Vite development
-server that will provide very fast hot reload of your frontend changes. If you want to develop in a browser
-and have access to your Go methods, there is also a dev server that runs on http://localhost:34115. Connect
-to this in your browser, and you can call your Go code from devtools.
+- **Backend**: Go (Wails framework)
+- **Frontend**: React + TypeScript
+- **Styling**: TailwindCSS v4
+- **Platform**: Windows (amd64)
 
-## Building
+## Development
 
-To build a redistributable, production mode package, use `wails build`.
+```bash
+# Install dependencies
+cd frontend
+npm install
+
+# Run in dev mode
+wails dev
