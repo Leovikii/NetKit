@@ -3,12 +3,20 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"os"
 	"os/exec"
 	"syscall"
 )
 
+type WailsConfig struct {
+	Info struct {
+		ProductVersion string `json:"productVersion"`
+	} `json:"info"`
+}
+
 type App struct {
-	ctx context.Context
+	ctx     context.Context
+	version string
 }
 
 type NetAdapter struct {
@@ -29,6 +37,21 @@ func NewApp() *App {
 
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+	a.loadVersion()
+}
+
+func (a *App) loadVersion() {
+	data, err := os.ReadFile("wails.json")
+	if err != nil {
+		return
+	}
+
+	var config WailsConfig
+	if err := json.Unmarshal(data, &config); err != nil {
+		return
+	}
+
+	a.version = config.Info.ProductVersion
 }
 
 func (a *App) GetAdapters() ([]NetAdapter, error) {
@@ -101,4 +124,8 @@ func (a *App) RestartAdapter(name string) error {
 	cmd := exec.Command("powershell", "-NoProfile", "-Command", psCommand)
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	return cmd.Run()
+}
+
+func (a *App) GetVersion() string {
+	return a.version
 }

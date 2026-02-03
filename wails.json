@@ -9,5 +9,14 @@
   "author": {
     "name": "Viki",
     "email": "94736133+Leovikii@users.noreply.github.com"
+  },
+   "info": {
+    "productName": "NetKit",
+    "companyName": "Viki Inc.",
+    "productVersion": "2.1.0",
+    "fileVersion": "2.1.0",
+    "copyright": "Copyright © 2026",
+    "comments": "Built using Wails",
+    "fileDescription": "NetKit Windows GUI"
   }
 }

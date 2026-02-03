@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
-import { GetAdapters, RestartAdapter } from "../wailsjs/go/main/App";
+import { GetAdapters, RestartAdapter, GetVersion } from "../wailsjs/go/main/App";
 import { WindowMinimise, Quit } from "../wailsjs/runtime/runtime";
 import { RefreshCw, Wifi, Hexagon, Zap, Minus, X, Info, Network, Globe, Router } from 'lucide-vue-next';
 import SkeletonCard from './components/SkeletonCard.vue';
@@ -24,6 +24,7 @@ const loading = ref(true);
 const restarting = ref<string | null>(null);
 const selectedAdapter = ref<Adapter | null>(null);
 const isClosing = ref(false);
+const version = ref<string>('');
 
 const fetchData = async () => {
     loading.value = true;
@@ -39,9 +40,10 @@ const fetchData = async () => {
 
 let interval: number;
 
-onMounted(() => {
+onMounted(async () => {
     fetchData();
     interval = setInterval(fetchData, 5000) as unknown as number;
+    version.value = await GetVersion();
 });
 
 onUnmounted(() => {
@@ -87,6 +89,7 @@ const openModal = (adapter: Adapter) => {
                     <Hexagon class="w-4 h-4 text-indigo-400" />
                 </div>
                 <span class="font-bold text-sm tracking-wide text-zinc-200">NetKit</span>
+                <span v-if="version" class="text-sm text-zinc-500 font-mono">v{{ version }}</span>
             </div>
             
             <div 
@@ -101,7 +104,7 @@ const openModal = (adapter: Adapter) => {
         <div class="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth z-10">
             <div class="flex justify-between items-center mb-2 px-1">
                 <h2 class="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Interfaces</h2>
-                <button @click="fetchData" class="p-2 rounded-full hover:bg-zinc-900 text-zinc-500 hover:text-indigo-400 transition-colors cursor-pointer active:rotate-180 duration-500">
+                <button @click="fetchData" class="p-2 rounded-full hover:bg-zinc-900 text-zinc-500 hover:text-indigo-400 transition-colors cursor-pointer">
                     <RefreshCw class="w-4 h-4" :class="{ 'animate-spin': loading }" />
                 </button>
             </div>
@@ -120,18 +123,15 @@ const openModal = (adapter: Adapter) => {
                     hover:border-indigo-500/50 hover:bg-zinc-900/80 hover:scale-[1.02] hover:shadow-[0_0_30px_-5px_rgba(99,102,241,0.15)]
                     active:scale-[0.98]"
                 >
-                    <div class="absolute -right-6 -top-6 opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:scale-110 group-hover:rotate-12">
-                        <Wifi class="w-32 h-32 text-indigo-500/10 blur-2xl" />
-                    </div>
-                    <div class="absolute inset-0 bg-linear-to-br from-indigo-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div class="absolute inset-0 bg-linear-to-br from-indigo-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                     <div class="flex justify-between items-start mb-4 relative z-10">
                         <div>
                             <h3 class="font-semibold text-base text-zinc-100 truncate max-w-48 group-hover:text-indigo-200 transition-colors">{{ adapter.name }}</h3>
                             <p class="text-[10px] text-zinc-500 truncate max-w-56 mt-0.5 font-mono group-hover:text-zinc-400 transition-colors">{{ adapter.interfaceDesc }}</p>
                         </div>
-                        <div class="flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border transition-all duration-300" :class="adapter.status === 'Up' ? 'bg-emerald-500/5 text-emerald-400 border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.1)] group-hover:shadow-[0_0_15px_rgba(16,185,129,0.2)]' : 'bg-rose-500/5 text-rose-400 border-rose-500/20'">
-                            <div class="w-1.5 h-1.5 rounded-full" :class="adapter.status === 'Up' ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'" />
+                        <div class="flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border transition-colors duration-300" :class="adapter.status === 'Up' ? 'bg-emerald-500/5 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/5 text-rose-400 border-rose-500/20'">
+                            <div class="w-1.5 h-1.5 rounded-full" :class="adapter.status === 'Up' ? 'bg-emerald-400' : 'bg-rose-400'" />
                             {{ adapter.status }}
                         </div>
                     </div>
@@ -174,9 +174,9 @@ const openModal = (adapter: Adapter) => {
         </div>
 
         <div v-if="selectedAdapter" class="fixed inset-0 z-50 flex items-center justify-center p-6" :class="isClosing ? 'animate-fade-out' : 'animate-fade-in'">
-            <div class="absolute inset-0 bg-zinc-950/80 backdrop-blur-sm" @click="handleCloseModal" />
+            <div class="absolute inset-0 bg-zinc-950/90" @click="handleCloseModal" />
             <div class="relative w-full max-w-sm bg-zinc-900 border border-zinc-800/80 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] ring-1 ring-white/10" :class="isClosing ? 'animate-scale-out' : 'animate-scale-in'">
-                <div class="flex items-center justify-between p-4 border-b border-zinc-800 bg-zinc-900/90 backdrop-blur-xl">
+                <div class="flex items-center justify-between p-4 border-b border-zinc-800 bg-zinc-900">
                     <h3 class="font-semibold text-zinc-100 flex items-center gap-2">
                         <Info class="w-4 h-4 text-indigo-400" /> Details
                     </h3>
